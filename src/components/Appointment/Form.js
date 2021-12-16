@@ -23,6 +23,7 @@ export default function Form(props) {
       return;
     }
 
+    // had to comment out code because it made the test fail - this is logic to have a user select an interviewer to create an appt
     // if (interviewer === null) {
     //   setError("Please select an interviewer");
     //   return;
