@@ -11,6 +11,26 @@ export default function useApplicationData(props) {
 
   const setDay = (day) => setState({ ...state, day });
 
+  // const updateSpots = (state, id, mod) => {
+  //   const days = [...state.days].map((day) => {
+  //     if (day.appointments.includes(id)) {
+  //       day.spots += mod;
+  //     }
+
+  //     return day;
+  //   });
+  //   console.log(days);
+  //   return days;
+  // };
+
+  const getSpots = (day, appointments) =>
+    day.appointments.length -
+    day.appointments.reduce(
+      (accumulator, id) =>
+        appointments[id].interview ? accumulator + 1 : accumulator,
+      0
+    );
+
   function bookInterview(id, interview) {
     console.log(id, interview);
 
@@ -24,13 +44,14 @@ export default function useApplicationData(props) {
       [id]: appointment,
     };
 
-    return axios.put(`/api/appointments/${id}`, { interview }).then(() => {
-      const days = [...state.days];
-      for (let day of days) {
-        if (day.appointments.includes(id)) {
-          day.spots = day.spots - 1;
-        }
+    const days = state.days.map((day) => {
+      if (day.appointments.includes(id)) {
+        return { ...day, spots: getSpots(day, appointments) };
       }
+      return day;
+    });
+
+    return axios.put(`/api/appointments/${id}`, { interview }).then(() => {
       setState({ ...state, appointments, days });
     });
   }
@@ -45,13 +66,14 @@ export default function useApplicationData(props) {
       [id]: appointment,
     };
 
-    return axios.delete(`/api/appointments/${id}`).then(() => {
-      const days = [...state.days];
-      for (let day of days) {
-        if (day.appointments.includes(id)) {
-          day.spots = day.spots + 1;
-        }
+    const days = state.days.map((day) => {
+      if (day.appointments.includes(id)) {
+        return { ...day, spots: getSpots(day, appointments) };
       }
+      return day;
+    });
+
+    return axios.delete(`/api/appointments/${id}`).then(() => {
       setState({ ...state, appointments, days });
     });
   }
